@@ -9,6 +9,8 @@ NES uses a modified version of [6502 chip](https://en.wikipedia.org/wiki/MOS_Tec
 
 ## memory map
 
+ref: https://bugzmanov.github.io/nes_ebook/images/ch3/cpu_registers_memory.png
+
 - **[0x0000..0x2000]** – this address space is used to access RAM. CPU has 2 KiB of internal RAM but 0x2000 = 8 KiB, so why is the RAM address space 4 times the actual internal RAM? it is because of [memory mirroring](#memory-mirroring)
 - **[0x2000..0x4020]** - to be used by other hardware modules such as PPU, APU and gamepads
 - **[0x4020..0x6000]** - this space's purposed changed quite a lot across multiple different generations. within the scope of building the emulator, we'll ignore this space
@@ -19,7 +21,7 @@ NES uses a modified version of [6502 chip](https://en.wikipedia.org/wiki/MOS_Tec
 
 ref: https://www.nesdev.org/obelisk-6502-guide/registers.html
 
-NES 2a03 has 6 registers in total
+NES 2a03 has 6 registers in total. apart from PC, remaining all register are 8-bit. PC is 16-bit
 
 - **program counter (PC)** - it is used to hold the address of the next instruction which is to be executed
 - **stack pointer (SP)** - it is used as an index for the stack. within the RAM, **[0x100..0x1FF]** is used for the stack and **[0x200..0x7FF]** is used for general purpose RAM. SP's initial value is 0x1FF. when a byte is pushed to the stack, SP value is decreased. when a byte is popped from the stack, SP value is increased. the stack in NES increases from top to bottom.
