@@ -6,6 +6,7 @@ NES uses a modified version of [6502 chip](https://en.wikipedia.org/wiki/MOS_Tec
 
 - uses a 16-bit address bus i.e. it can address 65536 different cells present in the [memory map](#memory-map)
 - 2 KiB internal RAM
+- follows little endian format for packing bytes together i.e. LSB is at the lower memory address
 
 ## memory map
 

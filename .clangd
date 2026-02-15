@@ -3,6 +3,7 @@ CompileFlags:
     - -I./lib
     - -I./include
     - -I./src
+    - -std=c++17
   Remove:
     - -mlongcalls
     - -fstrict-volatile-bitfields

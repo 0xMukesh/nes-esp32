@@ -1,37 +1,45 @@
-#include "../../lib/constants.hpp"
-#include "../../lib/cpu/cpu.hpp"
-#include <bitset>
+#include "../lib/cpu/cpu.hpp"
+#include "constants.hpp"
 #include <cstdint>
-#include <iostream>
-#include <tuple>
 #include <unity.h>
 #include <vector>
 
-void test_lda(void) {
-  // program, register a, status
-  auto tests = std::vector<std::tuple<std::vector<uint8_t>, uint8_t, uint8_t>>{
-      {{0xa9, 0x05, 0x00}, 0x05, 0},
-      {{0xa9, 0x00, 0x00}, 0x00, 0 | flags::ZERO},
-      {{0xa9, static_cast<uint8_t>(1 - 2), 0x00},
-       static_cast<uint8_t>(1 - 2),
-       0 | flags::NEGATIVE}};
+void test_lda_immediate() {
+  auto program = std::vector<uint8_t>{0xa9, 0x01, 0x00};
+  CPU cpu;
 
-  for (auto t : tests) {
-    CPU cpu;
-    auto program = std::get<0>(t);
-    auto register_a = std::get<1>(t);
-    auto status = std::get<2>(t);
+  cpu.load_program(program);
+  cpu.step();
 
-    cpu.interpret(program);
+  TEST_ASSERT_EQUAL(0x01, cpu.get_reg_a());
+  TEST_ASSERT_EQUAL(0, cpu.get_status());
+}
 
-    std::cout << "status: " << std::bitset<8>(cpu.status) << std::endl;
-    TEST_ASSERT_EQUAL(register_a, cpu.register_a);
-  }
+void test_lda_zero_flag() {
+  auto program = std::vector<uint8_t>{0xa9, 0x0, 0x00};
+  CPU cpu;
+  cpu.load_program(program);
+  cpu.step();
+
+  TEST_ASSERT_EQUAL(0, cpu.get_reg_a());
+  TEST_ASSERT_EQUAL(flags::ZERO, cpu.get_status());
+}
+
+void test_lda_negative_flag() {
+  auto program = std::vector<uint8_t>{0xa9, static_cast<uint8_t>(1 - 2), 0x00};
+  CPU cpu;
+  cpu.load_program(program);
+  cpu.step();
+
+  TEST_ASSERT_EQUAL(static_cast<uint8_t>(1 - 2), cpu.get_reg_a());
+  TEST_ASSERT_EQUAL(flags::NEGATIVE, cpu.get_status());
 }
 
 int main(int argc, char **argv) {
   UNITY_BEGIN();
-  RUN_TEST(test_lda);
+  RUN_TEST(test_lda_immediate);
+  RUN_TEST(test_lda_zero_flag);
+  RUN_TEST(test_lda_negative_flag);
   UNITY_END();
 
   return 0;

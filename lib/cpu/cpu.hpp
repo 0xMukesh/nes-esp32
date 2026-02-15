@@ -1,19 +1,59 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <vector>
+
+enum AddressingMode {
+  Immediate,
+  ZeroPage,
+  ZeroPage_X,
+  ZeroPage_Y,
+  Absolute,
+  Absolute_X,
+  Absolute_Y,
+  Indirect,
+  Indirect_X, // indexed indirect
+  Indirect_Y, // indirect indexed
+  Implied
+};
 
 class CPU {
 public:
   CPU();
-  void interpret(std::vector<uint8_t>);
 
-  // registers
-  uint16_t program_counter;
-  uint8_t register_a;
-  uint8_t status;
+  void load_program(const std::vector<uint8_t> &program,
+                    uint16_t start_addr = 0x8000);
+  void step();
+
+  uint16_t get_pc() { return pc; }
+  uint8_t get_reg_a() { return reg_a; }
+  uint8_t get_reg_x() { return reg_x; }
+  uint8_t get_reg_y() { return reg_y; }
+  uint8_t get_status() { return status; }
 
 private:
-  // instruction handlers
-  void lda(std::vector<uint8_t>);
+  std::array<uint8_t, 0xFFFF> memory;
+  uint16_t pc;
+  uint8_t reg_a;
+  uint8_t reg_x;
+  uint8_t reg_y;
+  uint8_t status;
+
+  uint8_t mem_read(uint16_t addr);
+  uint16_t mem_read_u16(uint16_t addr);
+  void mem_write(uint16_t addr, uint8_t data);
+
+  uint16_t get_addr(AddressingMode &mode);
+  uint8_t fetch_byte();
+
+  void op_lda(AddressingMode &mode);
+  void op_tax();
+  void op_inx();
+
+  void set_register_a(uint8_t value);
+  void set_register_x(uint8_t value);
+  void set_register_y(uint8_t value);
+
+  void update_zero_and_negative_flags(uint8_t value);
 };
