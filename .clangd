@@ -1,0 +1,15 @@
+CompileFlags:
+  Add:
+    - -I./lib
+    - -I./include
+    - -I./src
+  Remove:
+    - -mlongcalls
+    - -fstrict-volatile-bitfields
+    - -Wno-frame-address
+    - -fno-tree-switch-conversion
+  CompilationDatabase: ./.pio/build/esp32dev
+
+Diagnostics:
+  UnusedIncludes: Strict
+  MissingIncludes: None
