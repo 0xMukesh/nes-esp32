@@ -8,7 +8,7 @@ CompileFlags:
     - -fstrict-volatile-bitfields
     - -Wno-frame-address
     - -fno-tree-switch-conversion
-  CompilationDatabase: ./.pio/build/esp32dev
+  CompilationDatabase: .
 
 Diagnostics:
   UnusedIncludes: Strict
