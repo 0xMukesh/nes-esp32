@@ -66,7 +66,7 @@ ref: https://www.nesdev.org/obelisk-6502-guide/addressing.html
 
 - **relative** - it is generally used by branching instructions (instructions which are used to get same behaviour as if-else condition), where it takes in a 8-bit signed offset which is added to PC if condition is true
 - **indirect** - it uses 16-bit address to look up another 16-bit address. the value stored in the address which was passed gives the LSB of the final address and the following byte gives the MSB of the final address. ex: if location $0120 contains $FC and $0121 contains $BA then JMP ($0120) will cause the next instruction execution to occur at $BAFC
-- **indexed indirect** - it is like a combination of indirect and zero page, X addressing mode. it takes in a zero-page address (8-bit address), add the value of `X` register and then use that to look up a two-byte address in a similar way as how it is done in indirect addressing mode
+- **indexed indirect** - it is like a combination of indirect and zero page, X addressing mode. it takes in a zero-page address (8-bit address), add the value of `X` register to value present at that zero-page address and then use that to look up a two-byte address in a similar way as how it is done in indirect addressing mode
 - **indirect indexed** - over here, first the two-byte address is look up in a similar fashion as how it was done in indirect addressing mode and then the at the end value stored in `Y` register is added
 
 ## instructions

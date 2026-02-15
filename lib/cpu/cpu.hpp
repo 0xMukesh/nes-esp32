@@ -32,6 +32,8 @@ public:
   uint8_t get_reg_y() { return reg_y; }
   uint8_t get_status() { return status; }
 
+  uint8_t mem_read(uint16_t addr);
+
 private:
   std::array<uint8_t, 0xFFFF> memory;
   uint16_t pc;
@@ -40,13 +42,6 @@ private:
   uint8_t reg_y;
   uint8_t status;
 
-  uint8_t mem_read(uint16_t addr);
-  uint16_t mem_read_u16(uint16_t addr);
-  void mem_write(uint16_t addr, uint8_t data);
-
-  uint16_t get_addr(AddressingMode &mode);
-  uint8_t fetch_byte();
-
   void op_lda(AddressingMode &mode);
   void op_tax();
   void op_inx();
@@ -54,6 +49,11 @@ private:
   void set_register_a(uint8_t value);
   void set_register_x(uint8_t value);
   void set_register_y(uint8_t value);
-
   void update_zero_and_negative_flags(uint8_t value);
+
+  uint16_t mem_read_u16(uint16_t addr);
+  void mem_write(uint16_t addr, uint8_t data);
+
+  uint8_t fetch_next_byte();
+  uint16_t get_addr(AddressingMode &mode);
 };

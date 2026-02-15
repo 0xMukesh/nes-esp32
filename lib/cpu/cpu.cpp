@@ -3,7 +3,7 @@
 #include "opcodes.hpp"
 #include <stdexcept>
 
-CPU::CPU() : pc(0), reg_a(0), status(0) {}
+CPU::CPU() : pc(0), reg_a(0), reg_x(0), reg_y(0), status(0) {}
 
 void CPU::load_program(const std::vector<uint8_t> &program,
                        uint16_t start_addr) {
@@ -15,7 +15,7 @@ void CPU::load_program(const std::vector<uint8_t> &program,
 }
 
 void CPU::step() {
-  uint8_t code = fetch_byte();
+  uint8_t code = fetch_next_byte();
   auto map = GetOpCodeMap();
   auto opcode = map[code];
 
@@ -45,7 +45,7 @@ void CPU::step() {
     return;
   }
 
-  pc += opcode.num_bytes;
+  pc += opcode.num_bytes - 1;
 }
 
 // instruction handlers
@@ -92,7 +92,7 @@ uint16_t CPU::mem_read_u16(uint16_t addr) {
 void CPU::mem_write(uint16_t addr, uint8_t data) { memory[addr] = data; }
 
 // additional utils
-uint8_t CPU::fetch_byte() { return memory[pc++]; }
+uint8_t CPU::fetch_next_byte() { return memory[pc++]; }
 uint16_t CPU::get_addr(AddressingMode &mode) {
   switch (mode) {
   case Immediate:
@@ -115,16 +115,18 @@ uint16_t CPU::get_addr(AddressingMode &mode) {
     return (high << 8) | low;
   }
   case Indirect_X: {
-    uint16_t full_addr = static_cast<uint16_t>(mem_read(pc)) + reg_x;
-    uint8_t low = mem_read(pc);
-    uint8_t high = mem_read(pc);
+    uint8_t base = mem_read(pc);
+    uint8_t zero_page_addr = (base + reg_x) & 0xFF;
+    uint8_t low = mem_read(zero_page_addr);
+    uint8_t high = mem_read((zero_page_addr + 1) & 0xFF);
     return (high << 8) | low;
   }
   case Indirect_Y: {
-    uint8_t low = mem_read(pc);
-    uint8_t high = mem_read(pc);
-    uint16_t full_addr = (high << 8) | low;
-    return full_addr + static_cast<uint16_t>(reg_y);
+    uint8_t zero_page_addr = mem_read(pc);
+    uint8_t low = mem_read(zero_page_addr);
+    uint8_t high = mem_read((zero_page_addr + 1) & 0xFF);
+    uint16_t base_addr = (high << 8) | low;
+    return base_addr + static_cast<uint16_t>(reg_y);
   }
   default:
     throw std::runtime_error("invalid addressing mode: " +
