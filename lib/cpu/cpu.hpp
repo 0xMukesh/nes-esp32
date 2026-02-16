@@ -43,11 +43,16 @@ private:
   uint8_t status;
 
   void op_lda(AddressingMode &mode);
-  void op_tax();
-  void op_inx();
+  void op_ldx(AddressingMode &mode);
+  void op_ldy(AddressingMode &mode);
   void op_sta(AddressingMode &mode);
   void op_stx(AddressingMode &mode);
   void op_sty(AddressingMode &mode);
+  void op_tax();
+  void op_tay();
+  void op_txa();
+  void op_tya();
+  void op_inx();
 
   void set_register_a(uint8_t value);
   void set_register_x(uint8_t value);

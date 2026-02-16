@@ -25,6 +25,7 @@ void CPU::step() {
   }
 
   switch (code) {
+  // load operations
   case 0xa9:
   case 0xa5:
   case 0xb5:
@@ -35,12 +36,22 @@ void CPU::step() {
   case 0xb1:
     op_lda(opcode.mode);
     break;
-  case 0xaa:
-    op_tax();
+  case 0xa2:
+  case 0xa6:
+  case 0xb6:
+  case 0xae:
+  case 0xbe:
+    op_ldx(opcode.mode);
     break;
-  case 0xe8:
-    op_inx();
+  case 0xa0:
+  case 0xa4:
+  case 0xb4:
+  case 0xac:
+  case 0xbc:
+    op_ldy(opcode.mode);
     break;
+
+  // store operations
   case 0x85:
   case 0x95:
   case 0x8d:
@@ -60,6 +71,24 @@ void CPU::step() {
   case 0x8c:
     op_sty(opcode.mode);
     break;
+
+  // register transfers
+  case 0xaa:
+    op_tax();
+    break;
+  case 0xa8:
+    op_tay();
+    break;
+  case 0x8a:
+    op_txa();
+    break;
+  case 0x98:
+    op_tya();
+    break;
+
+  case 0xe8:
+    op_inx();
+    break;
   case 0x00:
     return;
   }
@@ -71,11 +100,18 @@ void CPU::step() {
 void CPU::op_lda(AddressingMode &mode) {
   auto addr = get_addr(mode);
   uint8_t value = mem_read(addr);
-
   set_register_a(value);
 }
-void CPU::op_tax() { set_register_x(reg_a); }
-void CPU::op_inx() { set_register_x(reg_x + 1); }
+void CPU::op_ldx(AddressingMode &mode) {
+  auto addr = get_addr(mode);
+  uint8_t value = mem_read(addr);
+  set_register_x(value);
+}
+void CPU::op_ldy(AddressingMode &mode) {
+  auto addr = get_addr(mode);
+  uint8_t value = mem_read(addr);
+  set_register_y(value);
+}
 void CPU::op_sta(AddressingMode &mode) {
   auto addr = get_addr(mode);
   mem_write(addr, reg_a);
@@ -88,6 +124,11 @@ void CPU::op_sty(AddressingMode &mode) {
   auto addr = get_addr(mode);
   mem_write(addr, reg_y);
 }
+void CPU::op_tax() { set_register_x(reg_a); }
+void CPU::op_tay() { set_register_y(reg_a); }
+void CPU::op_txa() { set_register_a(reg_x); }
+void CPU::op_tya() { set_register_a(reg_y); }
+void CPU::op_inx() { set_register_x(reg_x + 1); }
 
 // register and flags utils
 void CPU::set_register_a(uint8_t value) {
@@ -96,6 +137,10 @@ void CPU::set_register_a(uint8_t value) {
 }
 void CPU::set_register_x(uint8_t value) {
   reg_x = value;
+  update_zero_and_negative_flags(value);
+}
+void CPU::set_register_y(uint8_t value) {
+  reg_y = value;
   update_zero_and_negative_flags(value);
 }
 void CPU::update_zero_and_negative_flags(uint8_t value) {
