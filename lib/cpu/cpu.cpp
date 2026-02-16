@@ -41,6 +41,25 @@ void CPU::step() {
   case 0xe8:
     op_inx();
     break;
+  case 0x85:
+  case 0x95:
+  case 0x8d:
+  case 0x9d:
+  case 0x99:
+  case 0x81:
+  case 0x91:
+    op_sta(opcode.mode);
+    break;
+  case 0x86:
+  case 0x96:
+  case 0x8e:
+    op_stx(opcode.mode);
+    break;
+  case 0x84:
+  case 0x94:
+  case 0x8c:
+    op_sty(opcode.mode);
+    break;
   case 0x00:
     return;
   }
@@ -57,6 +76,18 @@ void CPU::op_lda(AddressingMode &mode) {
 }
 void CPU::op_tax() { set_register_x(reg_a); }
 void CPU::op_inx() { set_register_x(reg_x + 1); }
+void CPU::op_sta(AddressingMode &mode) {
+  auto addr = get_addr(mode);
+  mem_write(addr, reg_a);
+}
+void CPU::op_stx(AddressingMode &mode) {
+  auto addr = get_addr(mode);
+  mem_write(addr, reg_x);
+}
+void CPU::op_sty(AddressingMode &mode) {
+  auto addr = get_addr(mode);
+  mem_write(addr, reg_y);
+}
 
 // register and flags utils
 void CPU::set_register_a(uint8_t value) {

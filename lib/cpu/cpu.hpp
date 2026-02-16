@@ -45,6 +45,9 @@ private:
   void op_lda(AddressingMode &mode);
   void op_tax();
   void op_inx();
+  void op_sta(AddressingMode &mode);
+  void op_stx(AddressingMode &mode);
+  void op_sty(AddressingMode &mode);
 
   void set_register_a(uint8_t value);
   void set_register_x(uint8_t value);

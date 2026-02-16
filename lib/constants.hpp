@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+// N V _ B D I Z C
+
 namespace flags {
 constexpr uint8_t CARRY = (1 << 0);
 constexpr uint8_t ZERO = (1 << 1);

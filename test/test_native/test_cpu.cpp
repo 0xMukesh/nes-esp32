@@ -7,6 +7,7 @@
 const char *REGISTER_A_MISMATCH = "register A mismatch";
 const char *REGISTER_X_MISMATCH = "register X mismatch";
 const char *STATUS_MISMATCH = "status mismatch";
+const char *MEMORY_VALUE_MISMATCH = "memory value mismatch";
 
 CPU simulate_program(std::vector<uint8_t> program) {
   CPU cpu;
@@ -59,6 +60,13 @@ void test_inx_overflow() {
   TEST_ASSERT_EQUAL_MESSAGE(flags::ZERO, cpu.get_status(), STATUS_MISMATCH);
 }
 
+void test_sta_zero_page() {
+  auto cpu = simulate_program({0xa9, 0x01, 0x85, 0x05, 0x00});
+  TEST_ASSERT_EQUAL_MESSAGE(0x01, cpu.get_reg_a(), REGISTER_A_MISMATCH);
+  TEST_ASSERT_EQUAL_MESSAGE(0x01, cpu.mem_read(0x05), MEMORY_VALUE_MISMATCH);
+  TEST_ASSERT_EQUAL_MESSAGE(0, cpu.get_status(), STATUS_MISMATCH);
+}
+
 int main(int argc, char **argv) {
   UNITY_BEGIN();
   RUN_TEST(test_lda_immediate);
@@ -67,6 +75,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_tax);
   RUN_TEST(test_inx);
   RUN_TEST(test_inx_overflow);
+  RUN_TEST(test_sta_zero_page);
   UNITY_END();
 
   return 0;
