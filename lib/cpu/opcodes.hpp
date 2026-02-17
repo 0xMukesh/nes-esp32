@@ -14,6 +14,7 @@ struct OpCode {
 
 inline const std::vector<OpCode> &GetOpCodes() {
   static const std::vector<OpCode> opcodes = {
+      // load operations
       {"LDA", 0xa9, AddressingMode::Immediate, 2},
       {"LDA", 0xa5, AddressingMode::ZeroPage, 2},
       {"LDA", 0xb5, AddressingMode::ZeroPage_X, 2},
@@ -32,6 +33,7 @@ inline const std::vector<OpCode> &GetOpCodes() {
       {"LDY", 0xbc, AddressingMode::Absolute_X, 3},
       {"LDA", 0xa1, AddressingMode::Indirect_X, 2},
       {"LDA", 0xb1, AddressingMode::Indirect_Y, 2},
+      // store operations
       {"STA", 0x85, AddressingMode::ZeroPage, 2},
       {"STA", 0x95, AddressingMode::ZeroPage_X, 2},
       {"STA", 0x8d, AddressingMode::Absolute, 3},
@@ -45,10 +47,19 @@ inline const std::vector<OpCode> &GetOpCodes() {
       {"STY", 0x84, AddressingMode::ZeroPage, 2},
       {"STY", 0x94, AddressingMode::ZeroPage_X, 2},
       {"STY", 0x8c, AddressingMode::Absolute, 3},
+      // register transfers
       {"TAX", 0xaa, AddressingMode::Implied, 1},
       {"TAY", 0xa8, AddressingMode::Implied, 1},
       {"TXA", 0x8a, AddressingMode::Implied, 1},
       {"TYA", 0x98, AddressingMode::Implied, 1},
+      // stack operations
+      {"TSX", 0xba, AddressingMode::Implied, 1},
+      {"TXS", 0x9a, AddressingMode::Implied, 1},
+      {"PHA", 0x48, AddressingMode::Implied, 1},
+      {"PHP", 0x08, AddressingMode::Implied, 1},
+      {"PLA", 0x68, AddressingMode::Implied, 1},
+      {"PLP", 0x28, AddressingMode::Implied, 1},
+
       {"INX", 0xe8, AddressingMode::Implied, 1},
       {"BRK", 0x00, AddressingMode::Implied, 1},
   };

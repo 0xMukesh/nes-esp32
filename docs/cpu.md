@@ -12,11 +12,15 @@ NES uses a modified version of [6502 chip](https://en.wikipedia.org/wiki/MOS_Tec
 
 ref: https://bugzmanov.github.io/nes_ebook/images/ch3/cpu_registers_memory.png
 
-- **[0x0000..0x2000]** – this address space is used to access RAM. CPU has 2 KiB of internal RAM but 0x2000 = 8 KiB, so why is the RAM address space 4 times the actual internal RAM? it is because of [memory mirroring](#memory-mirroring)
+- **[0x0000..0x2000]** - this address space is used to access RAM. CPU has 2 KiB of internal RAM but 0x2000 = 8 KiB, so why is the RAM address space 4 times the actual designated RAM to CPU? it is because of [memory mirroring](#memory-mirroring). this space is subdivided into other chunks:
+  - **[0x0000..0x0100]** - it is known as "zero page", first 256 bytes
+  - **[0x0100..0x0200]** - used for storing the stack
+  - **[0x0200..0x0800]** - the actual RAM is stored over here
+  - **[0x0800..0x2000]** - mirrors of 0x0000 to 0x07FF address space
 - **[0x2000..0x4020]** - to be used by other hardware modules such as PPU, APU and gamepads
 - **[0x4020..0x6000]** - this space's purposed changed quite a lot across multiple different generations. within the scope of building the emulator, we'll ignore this space
 - **[0x6000..0x8000]** - RAM space for the cartridge
-- **[0x8000..0xFFFF]** - it is mapped to the PRG ROM (program ROM) space present on the cartridge
+- **[0x8000..0xFFFF]** - it is mapped to the PRG ROM (program ROM) space present on the cartridge -->
 
 ## registers
 
