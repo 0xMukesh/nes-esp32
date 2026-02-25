@@ -101,6 +101,60 @@ const std::array<CPU::OpCode, 256> &CPU::GetOpTable() {
     t[0x24] = {&CPU::op_bit, AddressingMode::ZeroPage, 2};
     t[0x2c] = {&CPU::op_bit, AddressingMode::Absolute, 3};
 
+    // increment operations
+    // -- INC
+    t[0xe6] = {&CPU::op_inc, AddressingMode::ZeroPage, 2};
+    t[0xf6] = {&CPU::op_inc, AddressingMode::ZeroPage_X, 2};
+    t[0xee] = {&CPU::op_inc, AddressingMode::Absolute, 3};
+    t[0xfe] = {&CPU::op_inc, AddressingMode::Absolute_X, 3};
+    // -- INX
+    t[0xe8] = {&CPU::op_inx, AddressingMode::Implied, 1};
+    // -- INY
+    t[0xc8] = {&CPU::op_iny, AddressingMode::Implied, 1};
+
+    // decrement operations
+    // -- DEC
+    t[0xc6] = {&CPU::op_dec, AddressingMode::ZeroPage, 2};
+    t[0xd6] = {&CPU::op_dec, AddressingMode::ZeroPage_X, 2};
+    t[0xce] = {&CPU::op_dec, AddressingMode::Absolute, 3};
+    t[0xde] = {&CPU::op_dec, AddressingMode::Absolute_X, 3};
+    // -- DEX
+    t[0xca] = {&CPU::op_dex, AddressingMode::Implied, 1};
+    // -- DEY
+    t[0x88] = {&CPU::op_dey, AddressingMode::Implied, 1};
+
+    // shifts
+    // -- ASL
+    t[0x0a] = {&CPU::op_asl, AddressingMode::Accumulator, 1};
+    t[0x06] = {&CPU::op_asl, AddressingMode::ZeroPage, 2};
+    t[0x16] = {&CPU::op_asl, AddressingMode::ZeroPage_X, 2};
+    t[0x0e] = {&CPU::op_asl, AddressingMode::Absolute, 3};
+    t[0x1e] = {&CPU::op_asl, AddressingMode::Absolute_X, 3};
+
+    // status flag changes
+    // -- CLC
+    t[0x18] = {&CPU::op_clc, AddressingMode::Implied, 1};
+    // -- CLD
+    t[0xd8] = {&CPU::op_cld, AddressingMode::Implied, 1};
+    // -- CLI
+    t[0x58] = {&CPU::op_cli, AddressingMode::Implied, 1};
+    // -- CLV
+    t[0xb8] = {&CPU::op_clv, AddressingMode::Implied, 1};
+    // -- SEC
+    t[0x38] = {&CPU::op_sec, AddressingMode::Implied, 1};
+    // -- SED
+    t[0xf8] = {&CPU::op_sed, AddressingMode::Implied, 1};
+    // -- SEI
+    t[0x78] = {&CPU::op_sei, AddressingMode::Implied, 1};
+
+    // system functions
+    // -- BRK
+    t[0x00] = {&CPU::op_brk, AddressingMode::Implied, 1};
+    // -- NOP
+    t[0xea] = {&CPU::op_nop, AddressingMode::Implied, 1};
+    // -- RTI
+    t[0x40] = {&CPU::op_rti, AddressingMode::Implied, 1};
+
     return t;
   }();
 

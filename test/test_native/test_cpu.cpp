@@ -13,19 +13,20 @@ CPU simulate_program(std::vector<uint8_t> program) {
   CPU cpu;
   cpu.load_program(program);
 
-  while (cpu.mem_read(cpu.get_pc()) != 0x00) {
+  for (auto _ : program) {
     cpu.step();
   }
 
   return cpu;
 }
 
-// -- LDA (https://www.nesdev.org/obelisk-6502-guide/reference.html#LDA)
+// -- LDA
 void test_load_acc_immediate() {
   auto cpu = simulate_program({0xa9, 0x01, // loads 0x01 into register A
                                0x00});
   TEST_ASSERT_EQUAL_MESSAGE(0x01, cpu.get_reg_a(), REGISTER_A_MISMATCH);
-  TEST_ASSERT_EQUAL_MESSAGE(0, cpu.get_status(), STATUS_MISMATCH);
+  TEST_ASSERT_EQUAL_MESSAGE(flags::UNUSED | flags::BREAK, cpu.get_status(),
+                            STATUS_MISMATCH);
 }
 void test_load_acc_zero_flag() {
   auto cpu = simulate_program({0xa9, 0x00, // loads 0x00 into register A
@@ -44,7 +45,7 @@ void test_load_acc_negative_flag() {
   TEST_ASSERT_EQUAL_MESSAGE(flags::NEGATIVE, cpu.get_status(), STATUS_MISMATCH);
 }
 
-// -- LDX (https://www.nesdev.org/obelisk-6502-guide/reference.html#LDX)
+// -- LDX
 void test_load_reg_x_immediate() {
   auto cpu = simulate_program({0xa2, 0x01, // loads 0x01 into register X
                                0x00});
@@ -52,7 +53,7 @@ void test_load_reg_x_immediate() {
   TEST_ASSERT_EQUAL_MESSAGE(0, cpu.get_status(), STATUS_MISMATCH);
 }
 
-// -- LDY (https://www.nesdev.org/obelisk-6502-guide/reference.html#LDY)
+// -- LDY
 void test_load_reg_y_immediate() {
   auto cpu = simulate_program({0xa0, 0x01, // loads 0x01 into register Y
                                0x00});
@@ -60,7 +61,7 @@ void test_load_reg_y_immediate() {
   TEST_ASSERT_EQUAL_MESSAGE(0, cpu.get_status(), STATUS_MISMATCH);
 }
 
-// -- STA (https://www.nesdev.org/obelisk-6502-guide/reference.html#STA)
+// -- STA
 void test_store_acc_zero_page() {
   auto cpu = simulate_program(
       {0xa9, 0x01, // loads 0x01 into register A
@@ -83,7 +84,7 @@ void test_store_acc_zero_page_x() {
   TEST_ASSERT_EQUAL_MESSAGE(0, cpu.get_status(), STATUS_MISMATCH);
 }
 
-// -- STX (https://www.nesdev.org/obelisk-6502-guide/reference.html#STX)
+// -- STX
 void test_store_reg_x_zero_page() {
   auto cpu = simulate_program(
       {0xa2, 0x01, // loads 0x02 into register X
@@ -106,7 +107,7 @@ void test_store_reg_x_zero_page_y() {
   TEST_ASSERT_EQUAL_MESSAGE(0, cpu.get_status(), STATUS_MISMATCH);
 }
 
-// -- STY (https://www.nesdev.org/obelisk-6502-guide/reference.html#STY)
+// -- STY
 void test_store_reg_y_zero_page() {
   auto cpu = simulate_program(
       {0xa0, 0x01, // loads 0x01 into register Y
@@ -129,7 +130,7 @@ void test_store_reg_y_zero_page_x() {
   TEST_ASSERT_EQUAL_MESSAGE(0, cpu.get_status(), STATUS_MISMATCH);
 }
 
-// -- TAX (https://www.nesdev.org/obelisk-6502-guide/reference.html#TAX)
+// -- TAX
 void test_transfer_acc_to_reg_x() {
   auto cpu =
       simulate_program({0xa9, 0x01, // loads 0x01 into register A
@@ -158,7 +159,7 @@ void test_transfer_acc_negative_flag() {
   TEST_ASSERT_EQUAL_MESSAGE(flags::NEGATIVE, cpu.get_status(), STATUS_MISMATCH);
 }
 
-// -- TAY (https://www.nesdev.org/obelisk-6502-guide/reference.html#TAY)
+// -- TAY
 void test_transfer_acc_to_reg_y() {
   auto cpu =
       simulate_program({0xa9, 0x01, // loads 0x01 into register A
@@ -169,7 +170,7 @@ void test_transfer_acc_to_reg_y() {
   TEST_ASSERT_EQUAL_MESSAGE(0, cpu.get_status(), STATUS_MISMATCH);
 }
 
-// -- TXA (https://www.nesdev.org/obelisk-6502-guide/reference.html#TXA)
+// -- TXA
 void test_transfer_reg_x_to_acc() {
   auto cpu =
       simulate_program({0xa2, 0x01, // loads 0x01 into register X
@@ -180,7 +181,7 @@ void test_transfer_reg_x_to_acc() {
   TEST_ASSERT_EQUAL_MESSAGE(0, cpu.get_status(), STATUS_MISMATCH);
 }
 
-// -- TYA (https://www.nesdev.org/obelisk-6502-guide/reference.html#TYA)
+// -- TYA
 void test_transfer_reg_y_to_acc() {
   auto cpu =
       simulate_program({0xa0, 0x01, // loads 0x01 into register Y
@@ -191,7 +192,7 @@ void test_transfer_reg_y_to_acc() {
   TEST_ASSERT_EQUAL_MESSAGE(0, cpu.get_status(), STATUS_MISMATCH);
 }
 
-// -- BIT (https://www.nesdev.org/obelisk-6502-guide/reference.html#BIT)
+// -- BIT
 void test_bit_test() {
   uint8_t data = 0b11000001;
   auto cpu = simulate_program(

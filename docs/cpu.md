@@ -43,7 +43,7 @@ NES 2a03 has 6 registers in total. apart from PC, remaining all register are 8-b
   - **bit 7 (negative, N)** - set if the result of an operation is negative i.e. bit 7 of the result is 1
   - **bit 6 (overflow, V)** - set if result of a signed arithmetic operation overflowed i.e. result is too large for a signed byte. it is determined by looking at the looking at the carry between bits 6 and 7 and between bit 7 and the carry flag i.e. whether the carry in bit and carry out bit for bit 7 are different or not
   - **bit 5 (unused)** - always set to 1
-  - **bit 4 (break, B)** - set when [BRK](https://www.nesdev.org/obelisk-6502-guide/reference.html#BRK) instruction is executed
+  - **bit 4 (break, B)** - it acts like a transient signal in the CPU. if the flags were pushed while processing an interrupt, then it is 0 and 1 when it is pushed by instructions (`BRK`, `PHP`)
   - **bit 3 (decimal mode, D)** - when decimal mode flag is set, processor will obey the rules of [binary coded decimal](https://en.wikipedia.org/wiki/Binary-coded_decimal) during arithmetic operations
   - **bit 2 (interrupt disable, I)** - set when [SEI](https://www.nesdev.org/obelisk-6502-guide/reference.html#SEI) instruction is executed
   - **bit 1 (zero, Z)** - set if the result of the operation was 0
@@ -90,27 +90,27 @@ ref: https://www.nesdev.org/obelisk-6502-guide/instructions.html
 - [x] [BRK](https://www.nesdev.org/obelisk-6502-guide/reference.html#BRK)
 - [ ] [BVC](https://www.nesdev.org/obelisk-6502-guide/reference.html#BVC)
 - [ ] [BVS](https://www.nesdev.org/obelisk-6502-guide/reference.html#BVS)
-- [ ] [CLC](https://www.nesdev.org/obelisk-6502-guide/reference.html#CLC)
-- [ ] [CLD](https://www.nesdev.org/obelisk-6502-guide/reference.html#CLD)
-- [ ] [CLI](https://www.nesdev.org/obelisk-6502-guide/reference.html#CLI)
-- [ ] [CLV](https://www.nesdev.org/obelisk-6502-guide/reference.html#CLV)
+- [x] [CLC](https://www.nesdev.org/obelisk-6502-guide/reference.html#CLC)
+- [x] [CLD](https://www.nesdev.org/obelisk-6502-guide/reference.html#CLD)
+- [x] [CLI](https://www.nesdev.org/obelisk-6502-guide/reference.html#CLI)
+- [x] [CLV](https://www.nesdev.org/obelisk-6502-guide/reference.html#CLV)
 - [ ] [CMP](https://www.nesdev.org/obelisk-6502-guide/reference.html#CMP)
 - [ ] [CPX](https://www.nesdev.org/obelisk-6502-guide/reference.html#CPX)
 - [ ] [CPY](https://www.nesdev.org/obelisk-6502-guide/reference.html#CPY)
-- [ ] [DEC](https://www.nesdev.org/obelisk-6502-guide/reference.html#DEC)
-- [ ] [DEX](https://www.nesdev.org/obelisk-6502-guide/reference.html#DEX)
-- [ ] [DEY](https://www.nesdev.org/obelisk-6502-guide/reference.html#DEY)
+- [x] [DEC](https://www.nesdev.org/obelisk-6502-guide/reference.html#DEC)
+- [x] [DEX](https://www.nesdev.org/obelisk-6502-guide/reference.html#DEX)
+- [x] [DEY](https://www.nesdev.org/obelisk-6502-guide/reference.html#DEY)
 - [x] [EOR](https://www.nesdev.org/obelisk-6502-guide/reference.html#EOR)
 - [x] [INC](https://www.nesdev.org/obelisk-6502-guide/reference.html#INC)
 - [x] [INX](https://www.nesdev.org/obelisk-6502-guide/reference.html#INX)
-- [ ] [INY](https://www.nesdev.org/obelisk-6502-guide/reference.html#INY)
+- [x] [INY](https://www.nesdev.org/obelisk-6502-guide/reference.html#INY)
 - [ ] [JMP](https://www.nesdev.org/obelisk-6502-guide/reference.html#JMP)
 - [ ] [JSR](https://www.nesdev.org/obelisk-6502-guide/reference.html#JSR)
 - [x] [LDA](https://www.nesdev.org/obelisk-6502-guide/reference.html#LDA)
 - [x] [LDX](https://www.nesdev.org/obelisk-6502-guide/reference.html#LDX)
 - [x] [LDY](https://www.nesdev.org/obelisk-6502-guide/reference.html#LDY)
 - [ ] [LSR](https://www.nesdev.org/obelisk-6502-guide/reference.html#LSR)
-- [ ] [NOP](https://www.nesdev.org/obelisk-6502-guide/reference.html#NOP)
+- [x] [NOP](https://www.nesdev.org/obelisk-6502-guide/reference.html#NOP)
 - [x] [ORA](https://www.nesdev.org/obelisk-6502-guide/reference.html#ORA)
 - [x] [PHA](https://www.nesdev.org/obelisk-6502-guide/reference.html#PHA)
 - [ ] [PHP](https://www.nesdev.org/obelisk-6502-guide/reference.html#PHP)
@@ -118,12 +118,12 @@ ref: https://www.nesdev.org/obelisk-6502-guide/instructions.html
 - [x] [PLP](https://www.nesdev.org/obelisk-6502-guide/reference.html#PLP)
 - [ ] [ROL](https://www.nesdev.org/obelisk-6502-guide/reference.html#ROL)
 - [ ] [ROR](https://www.nesdev.org/obelisk-6502-guide/reference.html#ROR)
-- [ ] [RTI](https://www.nesdev.org/obelisk-6502-guide/reference.html#RTI)
+- [x] [RTI](https://www.nesdev.org/obelisk-6502-guide/reference.html#RTI)
 - [ ] [RTS](https://www.nesdev.org/obelisk-6502-guide/reference.html#RTS)
 - [ ] [SBC](https://www.nesdev.org/obelisk-6502-guide/reference.html#SBC)
-- [ ] [SEC](https://www.nesdev.org/obelisk-6502-guide/reference.html#SEC)
-- [ ] [SED](https://www.nesdev.org/obelisk-6502-guide/reference.html#SED)
-- [ ] [SEI](https://www.nesdev.org/obelisk-6502-guide/reference.html#SEI)
+- [x] [SEC](https://www.nesdev.org/obelisk-6502-guide/reference.html#SEC)
+- [x] [SED](https://www.nesdev.org/obelisk-6502-guide/reference.html#SED)
+- [x] [SEI](https://www.nesdev.org/obelisk-6502-guide/reference.html#SEI)
 - [x] [STA](https://www.nesdev.org/obelisk-6502-guide/reference.html#STA)
 - [x] [STX](https://www.nesdev.org/obelisk-6502-guide/reference.html#STX)
 - [x] [STY](https://www.nesdev.org/obelisk-6502-guide/reference.html#STY)
@@ -152,3 +152,8 @@ if [0x0000...0x07FF] was selected to be the RAM within CPU's memory map (which i
 > "The address decoding for the 2600 is very simple. The TIA is accessed if A12 is 0 and A7 is 0. The TIA is selected if (address&1080 == 0000).
 > The TIA chip uses the 6 lower address lines A0-A5. **The reads seem to ignore A4 and A5.**
 > The addresses have different read/write definitions and many of them are strobes that are triggered by writing any value."
+
+## additional resources
+
+- https://www.emulationonline.com/systems/nes/6502-emulation-tips/
+- https://github.com/mnaberez/py65

@@ -6,6 +6,7 @@
 #include <vector>
 
 enum AddressingMode : uint8_t {
+  Accumulator,
   Immediate,
   ZeroPage,
   ZeroPage_X,
@@ -81,6 +82,28 @@ private:
   void op_eor(AddressingMode mode);
   void op_ora(AddressingMode mode);
   void op_bit(AddressingMode mode);
+  // increment operations
+  void op_inc(AddressingMode mode);
+  void op_inx(AddressingMode);
+  void op_iny(AddressingMode);
+  // decrement operations
+  void op_dec(AddressingMode mode);
+  void op_dex(AddressingMode);
+  void op_dey(AddressingMode);
+  // shifts
+  void op_asl(AddressingMode mode);
+  // status flag changes
+  void op_clc(AddressingMode);
+  void op_cld(AddressingMode);
+  void op_cli(AddressingMode);
+  void op_clv(AddressingMode);
+  void op_sec(AddressingMode);
+  void op_sed(AddressingMode);
+  void op_sei(AddressingMode);
+  // system functions
+  void op_brk(AddressingMode);
+  void op_nop(AddressingMode);
+  void op_rti(AddressingMode);
 
   // register utils
   void set_register_a(uint8_t value);
@@ -88,13 +111,13 @@ private:
   void set_register_y(uint8_t value);
 
   // flag utils
-  void add_status(uint8_t mask);
-  void remove_status(uint8_t mask);
+  void set_flag(uint8_t mask, bool condition);
   void update_zero_and_negative_flags(uint8_t value);
 
   // stack utils
   void stack_push(uint8_t data);
   uint8_t stack_pop();
+  uint16_t stack_pop_u16();
 
   // additional utils
   uint8_t fetch_next_byte();
