@@ -1,6 +1,4 @@
 #include "cpu.hpp"
-#include "constants.hpp"
-#include "opcodes.hpp"
 #include <stdexcept>
 
 CPU::CPU()
@@ -18,152 +16,99 @@ void CPU::load_program(const std::vector<uint8_t> &program,
 
 void CPU::step() {
   uint8_t code = fetch_next_byte();
-  auto map = GetOpCodeMap();
-  auto opcode = map[code];
-
-  if (map.find(code) == map.end()) {
-    printf("invalid opcode: 0x%02x", code);
-    return;
-  }
-
-  switch (code) {
-  // load operations
-  case 0xa9:
-  case 0xa5:
-  case 0xb5:
-  case 0xad:
-  case 0xbd:
-  case 0xb9:
-  case 0xa1:
-  case 0xb1:
-    op_lda(opcode.mode);
-    break;
-  case 0xa2:
-  case 0xa6:
-  case 0xb6:
-  case 0xae:
-  case 0xbe:
-    op_ldx(opcode.mode);
-    break;
-  case 0xa0:
-  case 0xa4:
-  case 0xb4:
-  case 0xac:
-  case 0xbc:
-    op_ldy(opcode.mode);
-    break;
-  // store operations
-  case 0x85:
-  case 0x95:
-  case 0x8d:
-  case 0x9d:
-  case 0x99:
-  case 0x81:
-  case 0x91:
-    op_sta(opcode.mode);
-    break;
-  case 0x86:
-  case 0x96:
-  case 0x8e:
-    op_stx(opcode.mode);
-    break;
-  case 0x84:
-  case 0x94:
-  case 0x8c:
-    op_sty(opcode.mode);
-    break;
-  // register transfers
-  case 0xaa:
-    op_tax();
-    break;
-  case 0xa8:
-    op_tay();
-    break;
-  case 0x8a:
-    op_txa();
-    break;
-  case 0x98:
-    op_tya();
-    break;
-  // stack operations
-  case 0xba:
-    op_tsx();
-    break;
-  case 0x9a:
-    op_txs();
-    break;
-  case 0x48:
-    op_pha();
-    break;
-  case 0x08:
-    op_php();
-    break;
-  case 0x68:
-    op_pla();
-    break;
-  case 0x28:
-    op_plp();
-    break;
-  case 0xe8:
-    op_inx();
-    break;
-  case 0x00:
-    return;
-  }
-
-  pc += opcode.num_bytes - 1;
+  const auto &entry = GetOpTable()[code];
+  (this->*entry.handler)(entry.mode);
+  pc += entry.bytes - 1;
 }
 
 // load operations
-void CPU::op_lda(AddressingMode &mode) {
+void CPU::op_lda(AddressingMode mode) {
   auto addr = get_addr(mode);
   uint8_t value = bus.mem_read(addr);
   set_register_a(value);
 }
-void CPU::op_ldx(AddressingMode &mode) {
+void CPU::op_ldx(AddressingMode mode) {
   auto addr = get_addr(mode);
   uint8_t value = bus.mem_read(addr);
   set_register_x(value);
 }
-void CPU::op_ldy(AddressingMode &mode) {
+void CPU::op_ldy(AddressingMode mode) {
   auto addr = get_addr(mode);
   uint8_t value = bus.mem_read(addr);
   set_register_y(value);
 }
 // store operations
-void CPU::op_sta(AddressingMode &mode) {
+void CPU::op_sta(AddressingMode mode) {
   auto addr = get_addr(mode);
   bus.mem_write(addr, reg_a);
 }
-void CPU::op_stx(AddressingMode &mode) {
+void CPU::op_stx(AddressingMode mode) {
   auto addr = get_addr(mode);
   bus.mem_write(addr, reg_x);
 }
-void CPU::op_sty(AddressingMode &mode) {
+void CPU::op_sty(AddressingMode mode) {
   auto addr = get_addr(mode);
   bus.mem_write(addr, reg_y);
 }
 // register transfers
-void CPU::op_tax() { set_register_x(reg_a); }
-void CPU::op_tay() { set_register_y(reg_a); }
-void CPU::op_txa() { set_register_a(reg_x); }
-void CPU::op_tya() { set_register_a(reg_y); }
+void CPU::op_tax(AddressingMode) { set_register_x(reg_a); }
+void CPU::op_tay(AddressingMode) { set_register_y(reg_a); }
+void CPU::op_txa(AddressingMode) { set_register_a(reg_x); }
+void CPU::op_tya(AddressingMode) { set_register_a(reg_y); }
 // stack operations
-void CPU::op_tsx() { set_register_x(sp); }
-void CPU::op_txs() { sp = reg_x; }
-void CPU::op_pha() { stack_push(reg_a); }
-void CPU::op_pla() {
+void CPU::op_tsx(AddressingMode) { set_register_x(sp); }
+void CPU::op_txs(AddressingMode) { sp = reg_x; }
+void CPU::op_pha(AddressingMode) { stack_push(reg_a); }
+void CPU::op_php(AddressingMode) { stack_push(status); }
+void CPU::op_pla(AddressingMode) {
   uint8_t data = stack_pop();
   set_register_a(data);
 }
-void CPU::op_plp() {
+void CPU::op_plp(AddressingMode) {
   uint8_t data = stack_pop();
   status = data;
 }
+// logical operations
+void CPU::op_and(AddressingMode mode) {
+  auto addr = get_addr(mode);
+  uint8_t value = bus.mem_read(addr);
+  set_register_a(reg_a & value);
+}
+void CPU::op_eor(AddressingMode mode) {
+  auto addr = get_addr(mode);
+  uint8_t value = bus.mem_read(addr);
+  set_register_a(reg_a ^ value);
+}
+void CPU::op_ora(AddressingMode mode) {
+  auto addr = get_addr(mode);
+  uint8_t value = bus.mem_read(addr);
+  set_register_a(reg_a | value);
+}
+void CPU::op_bit(AddressingMode mode) {
+  auto addr = get_addr(mode);
+  uint8_t value = bus.mem_read(addr);
+  auto and_value = reg_a & value;
 
-void CPU::op_inx() { set_register_x(reg_x + 1); }
+  if (and_value == 0) {
+    add_status(flags::ZERO);
+  } else {
+    remove_status(flags::ZERO);
+  }
 
-// register and flags utils
+  if (value & (1 << 7)) {
+    add_status(flags::NEGATIVE);
+  } else {
+    remove_status(flags::NEGATIVE);
+  }
+
+  if (value & (1 << 6)) {
+    add_status(flags::OVERFLOW);
+  } else {
+    remove_status(flags::OVERFLOW);
+  }
+}
+
+// register utils
 void CPU::set_register_a(uint8_t value) {
   reg_a = value;
   update_zero_and_negative_flags(value);
@@ -176,17 +121,21 @@ void CPU::set_register_y(uint8_t value) {
   reg_y = value;
   update_zero_and_negative_flags(value);
 }
+
+// flag utils
+void CPU::add_status(uint8_t mask) { status |= mask; }
+void CPU::remove_status(uint8_t mask) { status &= ~mask; }
 void CPU::update_zero_and_negative_flags(uint8_t value) {
   if (value == 0) {
-    status |= flags::ZERO;
+    add_status(flags::ZERO);
   } else {
-    status &= ~flags::ZERO;
+    remove_status(flags::ZERO);
   }
 
   if ((value & (1 << 7)) != 0) {
-    status |= flags::NEGATIVE;
+    add_status(flags::NEGATIVE);
   } else {
-    status &= ~flags::NEGATIVE;
+    remove_status(flags::NEGATIVE);
   }
 }
 
@@ -200,9 +149,13 @@ uint8_t CPU::stack_pop() {
   return bus.mem_read(memory_map::STACK_START + static_cast<uint16_t>(sp));
 }
 
+// mem utils
+uint8_t CPU::mem_read(uint16_t addr) { return bus.mem_read(addr); }
+uint16_t CPU::mem_read_u16(uint16_t addr) { return bus.mem_read_u16(addr); }
+
 // additional utils
 uint8_t CPU::fetch_next_byte() { return bus.mem_read(pc++); }
-uint16_t CPU::get_addr(AddressingMode &mode) {
+uint16_t CPU::get_addr(AddressingMode mode) {
   switch (mode) {
   case Immediate:
     return pc;

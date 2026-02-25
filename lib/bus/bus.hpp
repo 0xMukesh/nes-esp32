@@ -1,3 +1,5 @@
+#pragma once
+
 #include <array>
 #include <cstdint>
 
@@ -11,5 +13,5 @@ public:
   void mem_write_u16(uint16_t addr, uint16_t data);
 
 private:
-  std::array<uint8_t, 2048> cpu_vram;
+  std::array<uint8_t, 65536> ram;
 };

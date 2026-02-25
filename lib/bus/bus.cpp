@@ -1,5 +1,5 @@
 #include "bus.hpp"
-#include "constants.hpp"
+#include "../constants/constants.hpp"
 
 Bus::Bus() {}
 
@@ -8,7 +8,7 @@ uint8_t Bus::mem_read(uint16_t addr) {
     addr = addr & 0b0000011111111111;
   }
 
-  return cpu_vram[addr];
+  return ram[addr];
 }
 
 uint16_t Bus::mem_read_u16(uint16_t addr) {
@@ -18,7 +18,7 @@ uint16_t Bus::mem_read_u16(uint16_t addr) {
   return (high << 8) | low;
 }
 
-void Bus::mem_write(uint16_t addr, uint8_t data) { cpu_vram[addr] = data; }
+void Bus::mem_write(uint16_t addr, uint8_t data) { ram[addr] = data; }
 
 void Bus::mem_write_u16(uint16_t addr, uint16_t data) {
   auto low = static_cast<uint8_t>(data & 0xff);

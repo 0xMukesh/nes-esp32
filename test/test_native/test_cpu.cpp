@@ -1,5 +1,4 @@
 #include "../lib/cpu/cpu.hpp"
-#include "constants.hpp"
 #include <cstdint>
 #include <unity.h>
 #include <vector>
@@ -23,17 +22,23 @@ CPU simulate_program(std::vector<uint8_t> program) {
 
 // -- LDA (https://www.nesdev.org/obelisk-6502-guide/reference.html#LDA)
 void test_load_acc_immediate() {
-  auto cpu = simulate_program({0xa9, 0x01, 0x00});
+  auto cpu = simulate_program({0xa9, 0x01, // loads 0x01 into register A
+                               0x00});
   TEST_ASSERT_EQUAL_MESSAGE(0x01, cpu.get_reg_a(), REGISTER_A_MISMATCH);
   TEST_ASSERT_EQUAL_MESSAGE(0, cpu.get_status(), STATUS_MISMATCH);
 }
 void test_load_acc_zero_flag() {
-  auto cpu = simulate_program({0xa9, 0x00, 0x00});
+  auto cpu = simulate_program({0xa9, 0x00, // loads 0x00 into register A
+                               0x00});
   TEST_ASSERT_EQUAL_MESSAGE(0x00, cpu.get_reg_a(), REGISTER_A_MISMATCH);
   TEST_ASSERT_EQUAL_MESSAGE(flags::ZERO, cpu.get_status(), STATUS_MISMATCH);
 }
 void test_load_acc_negative_flag() {
-  auto cpu = simulate_program({0xa9, static_cast<uint8_t>(1 - 2), 0x00});
+  auto cpu = simulate_program(
+      {0xa9,
+       static_cast<uint8_t>(
+           1 - 2), // loads -1 (aka 255 in 8-bit system) into register A
+       0x00});
   TEST_ASSERT_EQUAL_MESSAGE(static_cast<uint8_t>(1 - 2), cpu.get_reg_a(),
                             REGISTER_A_MISMATCH);
   TEST_ASSERT_EQUAL_MESSAGE(flags::NEGATIVE, cpu.get_status(), STATUS_MISMATCH);
@@ -41,14 +46,16 @@ void test_load_acc_negative_flag() {
 
 // -- LDX (https://www.nesdev.org/obelisk-6502-guide/reference.html#LDX)
 void test_load_reg_x_immediate() {
-  auto cpu = simulate_program({0xa2, 0x01, 0x00});
+  auto cpu = simulate_program({0xa2, 0x01, // loads 0x01 into register X
+                               0x00});
   TEST_ASSERT_EQUAL_MESSAGE(0x01, cpu.get_reg_x(), REGISTER_X_MISMATCH);
   TEST_ASSERT_EQUAL_MESSAGE(0, cpu.get_status(), STATUS_MISMATCH);
 }
 
 // -- LDY (https://www.nesdev.org/obelisk-6502-guide/reference.html#LDY)
 void test_load_reg_y_immediate() {
-  auto cpu = simulate_program({0xa0, 0x01, 0x00});
+  auto cpu = simulate_program({0xa0, 0x01, // loads 0x01 into register Y
+                               0x00});
   TEST_ASSERT_EQUAL_MESSAGE(0x01, cpu.get_reg_y(), REGISTER_Y_MISMATCH);
   TEST_ASSERT_EQUAL_MESSAGE(0, cpu.get_status(), STATUS_MISMATCH);
 }
@@ -184,6 +191,20 @@ void test_transfer_reg_y_to_acc() {
   TEST_ASSERT_EQUAL_MESSAGE(0, cpu.get_status(), STATUS_MISMATCH);
 }
 
+// -- BIT (https://www.nesdev.org/obelisk-6502-guide/reference.html#BIT)
+void test_bit_test() {
+  uint8_t data = 0b11000001;
+  auto cpu = simulate_program(
+      {0xa9, 0b11000001, // loads value into register A
+       0x85, 0x60,       // dumps value of register A at $0x60
+       0x24, 0x60,       // performs bit test with value stored at $0x60 as mask
+       0x00});
+  TEST_ASSERT_EQUAL_MESSAGE(data, cpu.get_reg_a(), REGISTER_A_MISMATCH);
+  TEST_ASSERT_EQUAL_MESSAGE(data, cpu.mem_read(0x60), MEMORY_VALUE_MISMATCH);
+  TEST_ASSERT_EQUAL_MESSAGE(flags::NEGATIVE | flags::OVERFLOW, cpu.get_status(),
+                            STATUS_MISMATCH);
+}
+
 int main() {
   UNITY_BEGIN();
   // load operations
@@ -208,6 +229,9 @@ int main() {
   RUN_TEST(test_transfer_acc_to_reg_y);
   RUN_TEST(test_transfer_reg_x_to_acc);
   RUN_TEST(test_transfer_reg_y_to_acc);
+
+  // logical operations
+  RUN_TEST(test_bit_test);
 
   UNITY_END();
 
