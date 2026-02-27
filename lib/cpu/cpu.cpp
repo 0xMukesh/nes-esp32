@@ -1,10 +1,11 @@
 #include "cpu.hpp"
 #include <optional>
 #include <stdexcept>
+#include <string>
 
 CPU::CPU()
     : pc(0), sp(static_cast<uint8_t>(memory_map::STACK_START)), reg_a(0),
-      reg_x(0), reg_y(0), status(0b00100000) {}
+      reg_x(0), reg_y(0), status(flags::UNUSED) {}
 
 void CPU::load_program(const std::vector<uint8_t> &program,
                        uint16_t start_addr) {
@@ -136,17 +137,74 @@ void CPU::op_asl(AddressingMode mode) {
   set_flag(flags::CARRY, (value >> 7) == 1);
   value <<= 1;
 
-  if (mode == AddressingMode::Accumulator) {
-    set_register_a(value);
-  } else {
-    if (!addr.has_value()) {
-      throw std::runtime_error("failed to extract address");
-    }
-
-    bus.mem_write(addr.value(), value);
-    update_zero_and_negative_flags(value);
-  }
+  write_to_reg_a_or_mem(mode, addr, value);
 }
+void CPU::op_lsr(AddressingMode mode) {
+  uint8_t value = 0;
+  std::optional<uint16_t> addr;
+
+  if (mode == AddressingMode::Accumulator) {
+    value = reg_a;
+  } else {
+    addr = get_addr(mode);
+    value = bus.mem_read(addr.value());
+  }
+
+  set_flag(flags::CARRY, value & 1);
+  value >>= 1;
+
+  write_to_reg_a_or_mem(mode, addr, value);
+}
+void CPU::op_rol(AddressingMode mode) {
+  uint8_t value = 0;
+  std::optional<uint16_t> addr;
+
+  if (mode == AddressingMode::Accumulator) {
+    value = reg_a;
+  } else {
+    addr = get_addr(mode);
+    value = bus.mem_read(addr.value());
+  }
+
+  uint8_t prev_carry_flag = status & flags::CARRY;
+  set_flag(flags::CARRY, (value >> 7) == 1);
+
+  value <<= 1;
+  value |= prev_carry_flag & 1;
+
+  write_to_reg_a_or_mem(mode, addr, value);
+}
+void CPU::op_ror(AddressingMode mode) {
+  uint8_t value = 0;
+  std::optional<uint16_t> addr;
+
+  if (mode == AddressingMode::Accumulator) {
+    value = reg_a;
+  } else {
+    addr = get_addr(mode);
+    value = bus.mem_read(addr.value());
+  }
+
+  uint8_t prev_carry_flag = status & flags::CARRY;
+  set_flag(flags::CARRY, (value & 1) == 1);
+
+  value >>= 1;
+  value |= (prev_carry_flag & 1) << 7;
+
+  write_to_reg_a_or_mem(mode, addr, value);
+}
+// jumps
+void CPU::op_jmp(AddressingMode mode) {
+  auto addr = get_addr(mode);
+  pc = addr;
+}
+void CPU::op_jsr(AddressingMode mode) {
+  auto addr = get_addr(mode);
+  stack_push_u16(addr - 1);
+  pc = addr;
+}
+void CPU::op_rts(AddressingMode) { pc = stack_pop_u16() + 1; }
+
 // status flag changes
 void CPU::op_clc(AddressingMode) { set_flag(flags::CARRY, false); }
 void CPU::op_cld(AddressingMode) { set_flag(flags::DECIMAL_MODE, false); }
@@ -158,7 +216,7 @@ void CPU::op_sei(AddressingMode) { set_flag(flags::INTERRUPT_DISABLE, true); }
 // system functions
 void CPU::op_brk(AddressingMode) {
   pc += 1;
-  stack_push(pc);
+  stack_push_u16(pc);
   stack_push(status);
 
   pc = bus.mem_read_u16(INTERRUPT_VECTOR);
@@ -199,6 +257,13 @@ void CPU::stack_push(uint8_t data) {
   bus.mem_write(memory_map::STACK_START + static_cast<uint16_t>(sp), data);
   sp -= 1;
 }
+void CPU::stack_push_u16(uint16_t data) {
+  uint8_t low = data & 0xff;
+  uint8_t high = data >> 8;
+
+  stack_push(high);
+  stack_push(low);
+}
 uint8_t CPU::stack_pop() {
   sp += 1;
   return bus.mem_read(memory_map::STACK_START + static_cast<uint16_t>(sp));
@@ -216,9 +281,24 @@ uint16_t CPU::mem_read_u16(uint16_t addr) { return bus.mem_read_u16(addr); }
 
 // additional utils
 uint8_t CPU::fetch_next_byte() { return bus.mem_read(pc++); }
+void CPU::write_to_reg_a_or_mem(AddressingMode mode,
+                                std::optional<uint16_t> addr, uint8_t value) {
+  if (mode == AddressingMode::Accumulator) {
+    set_register_a(value);
+  } else {
+    if (!addr.has_value()) {
+      throw std::runtime_error("failed to extract address");
+    }
+
+    bus.mem_write(addr.value(), value);
+    update_zero_and_negative_flags(value);
+  }
+}
 uint16_t CPU::get_addr(AddressingMode mode) {
   switch (mode) {
   case Immediate:
+    return pc++;
+  case Relative:
     return pc++;
   case ZeroPage:
     return bus.mem_read(pc++);
@@ -243,8 +323,20 @@ uint16_t CPU::get_addr(AddressingMode mode) {
   }
   case Indirect: {
     uint16_t ptr = bus.mem_read_u16(pc);
+    uint16_t value;
+
+    // checking if it is on page boundary
+    if ((ptr & 0x00FF) == 0x00FF) {
+      uint8_t low = bus.mem_read(ptr);
+      uint8_t high = bus.mem_read(ptr & 0xFF00);
+
+      value = (high << 8) | low;
+    } else {
+      value = bus.mem_read_u16(ptr);
+    }
+
     pc += 2;
-    return bus.mem_read_u16(ptr);
+    return value;
   }
   case Indirect_X: {
     uint8_t base = bus.mem_read(pc++);

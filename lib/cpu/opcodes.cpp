@@ -130,6 +130,51 @@ const std::array<CPU::OpCode, 256> &CPU::GetOpTable() {
     t[0x16] = {&CPU::op_asl, AddressingMode::ZeroPage_X, 2};
     t[0x0e] = {&CPU::op_asl, AddressingMode::Absolute, 3};
     t[0x1e] = {&CPU::op_asl, AddressingMode::Absolute_X, 3};
+    // -- LSR
+    t[0x4a] = {&CPU::op_lsr, AddressingMode::Accumulator, 1};
+    t[0x46] = {&CPU::op_lsr, AddressingMode::ZeroPage, 2};
+    t[0x56] = {&CPU::op_lsr, AddressingMode::ZeroPage_X, 2};
+    t[0x4e] = {&CPU::op_lsr, AddressingMode::Absolute, 3};
+    t[0x5e] = {&CPU::op_lsr, AddressingMode::Absolute_X, 3};
+    // -- ROL
+    t[0x2a] = {&CPU::op_rol, AddressingMode::Accumulator, 1};
+    t[0x26] = {&CPU::op_rol, AddressingMode::ZeroPage, 2};
+    t[0x36] = {&CPU::op_rol, AddressingMode::ZeroPage_X, 2};
+    t[0x2e] = {&CPU::op_rol, AddressingMode::Absolute, 3};
+    t[0x3e] = {&CPU::op_rol, AddressingMode::Absolute_X, 3};
+    // -- ROR
+    t[0x6a] = {&CPU::op_ror, AddressingMode::Accumulator, 1};
+    t[0x66] = {&CPU::op_ror, AddressingMode::ZeroPage, 2};
+    t[0x76] = {&CPU::op_ror, AddressingMode::ZeroPage_X, 2};
+    t[0x6e] = {&CPU::op_ror, AddressingMode::Absolute, 3};
+    t[0x7e] = {&CPU::op_ror, AddressingMode::Absolute_X, 3};
+
+    // jumps & calls
+    // -- JMP
+    t[0x4c] = {&CPU::op_jmp, AddressingMode::Absolute, 3};
+    t[0x6c] = {&CPU::op_jmp, AddressingMode::Indirect, 3};
+    // -- JSR
+    t[0x20] = {&CPU::op_jsr, AddressingMode::Absolute, 3};
+    // -- RTS
+    t[0x60] = {&CPU::op_rts, AddressingMode::Implied, 1};
+
+    // branches
+    // // -- BCC
+    // t[0x90] = {&CPU::op_bcc, AddressingMode::Relative, 2};
+    // // -- BCS
+    // t[0xb0] = {&CPU::op_bcs, AddressingMode::Relative, 2};
+    // // -- BEQ
+    // t[0xf0] = {&CPU::op_beq, AddressingMode::Relative, 2};
+    // // -- BMI
+    // t[0x30] = {&CPU::op_bmi, AddressingMode::Relative, 2};
+    // // -- BNE
+    // t[0xd0] = {&CPU::op_bne, AddressingMode::Relative, 2};
+    // // -- BPL
+    // t[0x10] = {&CPU::op_bpl, AddressingMode::Relative, 2};
+    // // -- BVC
+    // t[0x50] = {&CPU::op_bvc, AddressingMode::Relative, 2};
+    // // -- BVS
+    // t[0x70] = {&CPU::op_bvs, AddressingMode::Relative, 2};
 
     // status flag changes
     // -- CLC

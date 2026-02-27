@@ -3,11 +3,14 @@
 #include "../bus/bus.hpp"
 #include "../constants/constants.hpp"
 #include <cstdint>
+#include <optional>
 #include <vector>
 
 enum AddressingMode : uint8_t {
   Accumulator,
+  Implied,
   Immediate,
+  Relative,
   ZeroPage,
   ZeroPage_X,
   ZeroPage_Y,
@@ -17,7 +20,6 @@ enum AddressingMode : uint8_t {
   Indirect,
   Indirect_X, // indexed indirect
   Indirect_Y, // indirect indexed
-  Implied
 };
 
 class CPU {
@@ -92,6 +94,14 @@ private:
   void op_dey(AddressingMode);
   // shifts
   void op_asl(AddressingMode mode);
+  void op_lsr(AddressingMode mode);
+  void op_rol(AddressingMode mode);
+  void op_ror(AddressingMode mode);
+  // jumps
+  void op_jmp(AddressingMode mode);
+  void op_jsr(AddressingMode mode);
+  void op_rts(AddressingMode);
+  // branches
   // status flag changes
   void op_clc(AddressingMode);
   void op_cld(AddressingMode);
@@ -116,10 +126,13 @@ private:
 
   // stack utils
   void stack_push(uint8_t data);
+  void stack_push_u16(uint16_t data);
   uint8_t stack_pop();
   uint16_t stack_pop_u16();
 
   // additional utils
   uint8_t fetch_next_byte();
   uint16_t get_addr(AddressingMode mode);
+  void write_to_reg_a_or_mem(AddressingMode mode, std::optional<uint16_t> addr,
+                             uint8_t value);
 };
